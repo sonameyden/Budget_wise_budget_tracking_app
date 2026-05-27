@@ -1,11 +1,13 @@
 /**
  * GoalModal — matches pic: goal category icon grid, goal name,
- * target amount, current amount, target date.
+ * target amount, current amount, target date, linked savings account, monthly savings.
  */
 import { useForm, Controller } from 'react-hook-form';
+import { useEffect, useState } from 'react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
-import { useCreateGoal } from '../hooks/useGoals';
+import { useCreateGoal, useUpdateGoal } from '../hooks/useGoals';
+import apiClient from '../../../services/apiClient';
 
 const GOAL_CATEGORIES = [
   { label: 'Emergency', icon: '🛡️', value: 'Emergency Fund' },
@@ -21,8 +23,18 @@ const INPUT_CLS = `w-full px-4 py-3 text-sm border border-slate-200 dark:border-
   rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100
   focus:outline-none focus:border-emerald-400 placeholder-slate-400`;
 
-const GoalModal = ({ isOpen, onClose }) => {
-  const { mutate: doCreate, isPending } = useCreateGoal();
+const GoalModal = ({ isOpen, onClose, initialData = null }) => {
+  const isEdit = !!initialData;
+  const [accounts, setAccounts] = useState([]);
+  const { mutate: doCreate, isPending: creating } = useCreateGoal();
+  const { mutate: doUpdate, isPending: updating } = useUpdateGoal();
+
+  useEffect(() => {
+    // Fetch accounts to show in savings account dropdown
+    if (isOpen) {
+      apiClient.get('/accounts').then(res => setAccounts(res.data?.accounts || [])).catch(() => {});
+    }
+  }, [isOpen]);
 
   const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -31,26 +43,53 @@ const GoalModal = ({ isOpen, onClose }) => {
       target_amount: '',
       current_amount: '',
       deadline: '',
+      linked_savings_account_id: '',
+      monthly_savings_amount: '',
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        ...initialData,
+        monthly_savings_amount: initialData.monthly_savings_amount || '',
+        linked_savings_account_id: initialData.linked_savings_account_id || '',
+      });
+    } else {
+      reset({
+        category: 'Custom Goal',
+        title: '',
+        target_amount: '',
+        current_amount: '',
+        deadline: '',
+        linked_savings_account_id: '',
+        monthly_savings_amount: '',
+      });
+    }
+  }, [initialData, isOpen, reset]);
 
   const selectedCategory = watch('category');
 
   const onSubmit = (data) => {
-    doCreate(
-      {
-        title: data.title || data.category,
-        category: data.category,
-        target_amount: parseFloat(data.target_amount),
-        current_amount: parseFloat(data.current_amount || 0),
-        deadline: data.deadline || null,
-      },
-      { onSuccess: () => { reset(); onClose(); } }
-    );
+    const payload = {
+      title: data.title || data.category,
+      category: data.category,
+      target_amount: parseFloat(data.target_amount),
+      current_amount: parseFloat(data.current_amount || 0),
+      deadline: data.deadline || null,
+      linked_savings_account_id: data.linked_savings_account_id || null,
+      monthly_savings_amount: parseFloat(data.monthly_savings_amount || 0),
+    };
+    
+    if (isEdit) {
+      doUpdate({ id: initialData.id, data: payload }, { onSuccess: () => { reset(); onClose(); } });
+    } else {
+      doCreate(payload, { onSuccess: () => { reset(); onClose(); } });
+    }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Savings Goal" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Savings Goal' : 'Create Savings Goal'} size="md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
         {/* Goal Category grid */}
@@ -120,10 +159,41 @@ const GoalModal = ({ isOpen, onClose }) => {
           <input type="date" className={INPUT_CLS} {...register('deadline')} />
         </div>
 
+        {/* Link to Savings Account */}
+        <div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+            Link to Savings Account <span className="text-xs text-slate-400 font-normal">(optional)</span>
+          </p>
+          <select className={INPUT_CLS} {...register('linked_savings_account_id')}>
+            <option value="">No account linked</option>
+            {accounts.map(acc => (
+              <option key={acc.id} value={acc.id}>
+                {acc.account_name} ({acc.account_type})
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-400 mt-1">Select a savings account to track progress.</p>
+        </div>
+
+        {/* Monthly Savings Amount */}
+        <div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+            Monthly Savings <span className="text-xs text-slate-400 font-normal">(optional)</span>
+          </p>
+          <input
+            type="number" step="0.01" placeholder="0.00"
+            className={INPUT_CLS}
+            {...register('monthly_savings_amount')}
+          />
+          <p className="text-xs text-slate-400 mt-1">How much to save per month toward this goal.</p>
+        </div>
+
         {/* Actions */}
         <div className="flex gap-3 pt-1">
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
-          <Button type="submit" loading={isPending} className="flex-1">Create Goal</Button>
+          <Button type="submit" loading={creating || updating} className="flex-1">
+            {isEdit ? 'Update Goal' : 'Create Goal'}
+          </Button>
         </div>
       </form>
     </Modal>

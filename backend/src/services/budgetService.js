@@ -51,7 +51,7 @@ const getByMonth = async (userId, month, year) => {
  * Create a new budget after checking for ownership context.
  *
  * @param {string} userId
- * @param {Object} body - { category, limit_amount, month, year }
+ * @param {Object} body - { category, limit_amount, month, year, spend_plan? }
  * @returns {Promise<Object>}
  */
 const create = async (userId, body) => {
@@ -62,12 +62,17 @@ const create = async (userId, body) => {
     month: parseInt(body.month, 10),
     year: parseInt(body.year, 10),
   };
+  
+  // Optional: include spend_plan (planned spending for this category)
+  if (body.spend_plan !== undefined) {
+    budgetData.spend_plan = parseFloat(body.spend_plan);
+  }
 
   return budgetRepository.create(budgetData);
 };
 
 /**
- * Update a budget limit — verifies ownership.
+ * Update a budget limit and/or spend plan — verifies ownership.
  *
  * @param {string} budgetId
  * @param {string} userId
@@ -91,6 +96,7 @@ const update = async (budgetId, userId, body) => {
 
   const updates = {};
   if (body.limit_amount !== undefined) updates.limit_amount = parseFloat(body.limit_amount);
+  if (body.spend_plan !== undefined) updates.spend_plan = parseFloat(body.spend_plan);
 
   return budgetRepository.update(budgetId, updates);
 };

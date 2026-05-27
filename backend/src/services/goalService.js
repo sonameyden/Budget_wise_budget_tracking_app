@@ -23,7 +23,7 @@ const getAll = async (userId) => {
  * Create a new savings goal.
  *
  * @param {string} userId
- * @param {Object} body - { title, category, target_amount, current_amount, deadline }
+ * @param {Object} body - { title, category, target_amount, current_amount, deadline, linked_savings_account_id?, monthly_savings_amount? }
  * @returns {Promise<Object>}
  */
 const create = async (userId, body) => {
@@ -36,6 +36,16 @@ const create = async (userId, body) => {
     deadline: body.deadline || null,
     completed: false,
   };
+  
+  // Link goal to a specific savings account
+  if (body.linked_savings_account_id) {
+    goalData.linked_savings_account_id = body.linked_savings_account_id;
+  }
+  
+  // Define how much to save per month toward this goal
+  if (body.monthly_savings_amount !== undefined) {
+    goalData.monthly_savings_amount = parseFloat(body.monthly_savings_amount);
+  }
 
   const goal = await goalRepository.create(goalData);
   return enrichGoal(goal);
@@ -69,6 +79,8 @@ const update = async (goalId, userId, body) => {
   if (body.title !== undefined) updates.title = body.title.trim();
   if (body.target_amount !== undefined) updates.target_amount = parseFloat(body.target_amount);
   if (body.deadline !== undefined) updates.deadline = body.deadline;
+  if (body.linked_savings_account_id !== undefined) updates.linked_savings_account_id = body.linked_savings_account_id;
+  if (body.monthly_savings_amount !== undefined) updates.monthly_savings_amount = parseFloat(body.monthly_savings_amount);
 
   // When adding funds, update current_amount and auto-detect completion
   if (body.current_amount !== undefined) {

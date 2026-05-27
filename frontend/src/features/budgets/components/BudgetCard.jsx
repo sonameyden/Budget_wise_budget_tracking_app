@@ -9,6 +9,7 @@ const ICONS = { 'Food & Dining':'🍔','Transportation':'🚗','Shopping':'🛍�
 const BudgetCard = ({ budget, onEdit, onDelete }) => {
   const currency = useCurrency();
   const spent = budget.spent || 0;
+  const planned = budget.spend_plan || 0;
   const pct   = Math.min(Math.round((spent / budget.limit_amount) * 100), 999);
   const over  = spent > budget.limit_amount;
   const remaining = budget.limit_amount - spent;
@@ -29,6 +30,12 @@ const BudgetCard = ({ budget, onEdit, onDelete }) => {
           <button onClick={() => onDelete(budget.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
         </div>
       </div>
+
+      {planned > 0 && (
+        <div className="text-xs text-violet-600 dark:text-violet-400 font-medium mb-2">
+          📋 Planned: {formatCurrency(planned, currency)}
+        </div>
+      )}
 
       <div className="flex justify-between text-xs text-slate-500 mb-2">
         <span>{formatCurrency(spent, currency)} spent</span>

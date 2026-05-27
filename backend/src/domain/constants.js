@@ -1,45 +1,38 @@
 /**
- * constants.js
- * Single source of truth for all domain constants.
- * Import these anywhere you need categories, types, or payment methods
- * instead of writing string literals that could drift out of sync.
+ * constants.js — single source of truth for all domain enums.
  */
 
-/** Valid transaction types */
-const TRANSACTION_TYPES = {
-  INCOME: 'income',
-  EXPENSE: 'expense',
-};
+const TRANSACTION_TYPES = { INCOME: 'income', EXPENSE: 'expense' };
 
-/** All valid spending/income categories */
 const CATEGORIES = [
-  'Food & Dining',
-  'Transportation',
-  'Shopping',
-  'Entertainment',
-  'Bills & Utilities',
-  'Health',
-  'Education',
-  'Travel',
-  'Salary',
-  'Freelance',
-  'Investment',
-  'Other',
+  'Food & Dining','Transportation','Shopping','Entertainment',
+  'Bills & Utilities','Health','Education','Travel',
+  'Salary','Freelance','Investment','Other',
 ];
 
-/** Valid payment methods */
-const PAYMENT_METHODS = ['cash', 'card', 'wallet', 'bank_transfer', 'other'];
+const PAYMENT_METHODS = ['cash','card','wallet','bank_transfer','other'];
 
-/** Analytics period options */
-const ANALYTICS_PERIODS = ['week', 'month', 'year'];
+const ANALYTICS_PERIODS = ['week','month','year'];
 
-/** Maximum transactions returned per page */
 const TRANSACTIONS_PER_PAGE = 50;
 
+const ACCOUNT_TYPES = [
+  'bank_account','cash_wallet','savings_account',
+  'digital_wallet','credit_account','investment_account',
+];
+
+const INCOME_FREQUENCIES = [
+  'weekly','bi_weekly','monthly','quarterly','annually','one_time',
+];
+
+const INCOME_CATEGORIES = [
+  'salary','freelance','scholarship','passive','business','side_income','other',
+];
+
+const INCOME_STATUSES = ['active','paused','ended'];
+
 module.exports = {
-  TRANSACTION_TYPES,
-  CATEGORIES,
-  PAYMENT_METHODS,
-  ANALYTICS_PERIODS,
-  TRANSACTIONS_PER_PAGE,
+  TRANSACTION_TYPES, CATEGORIES, PAYMENT_METHODS,
+  ANALYTICS_PERIODS, TRANSACTIONS_PER_PAGE,
+  ACCOUNT_TYPES, INCOME_FREQUENCIES, INCOME_CATEGORIES, INCOME_STATUSES,
 };

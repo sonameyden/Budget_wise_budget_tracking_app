@@ -35,6 +35,7 @@ const BudgetModal = ({ isOpen, onClose, initialData = null }) => {
     defaultValues: {
       category: 'Food & Dining',
       limit_amount: '',
+      spend_plan: '',
       period: 'monthly',
       alerts: true,
       month,
@@ -44,13 +45,14 @@ const BudgetModal = ({ isOpen, onClose, initialData = null }) => {
 
   useEffect(() => {
     if (initialData) reset({ ...initialData, period: 'monthly', alerts: true });
-    else reset({ category: 'Food & Dining', limit_amount: '', period: 'monthly', alerts: true, month, year });
+    else reset({ category: 'Food & Dining', limit_amount: '', spend_plan: '', period: 'monthly', alerts: true, month, year });
   }, [initialData, isOpen, reset]);
 
   const onSubmit = (data) => {
     const payload = {
       category: data.category,
       limit_amount: parseFloat(data.limit_amount),
+      spend_plan: parseFloat(data.spend_plan || 0),
       month: parseInt(data.month, 10),
       year: parseInt(data.year, 10),
     };
@@ -92,13 +94,26 @@ const BudgetModal = ({ isOpen, onClose, initialData = null }) => {
 
         {/* Budget Amount */}
         <div>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Budget Amount</p>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Budget Limit</p>
           <input
             type="number" step="0.01" placeholder="0.00"
             className={INPUT_CLS}
             {...register('limit_amount', { required: 'Amount required', min: { value: 1, message: 'Must be > 0' } })}
           />
           {errors.limit_amount && <p className="text-xs text-red-500 mt-1">{errors.limit_amount.message}</p>}
+        </div>
+
+        {/* Spend Plan */}
+        <div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+            Planned Spending <span className="text-xs text-slate-400 font-normal">(optional)</span>
+          </p>
+          <input
+            type="number" step="0.01" placeholder="0.00"
+            className={INPUT_CLS}
+            {...register('spend_plan')}
+          />
+          <p className="text-xs text-slate-400 mt-1">How much you intend to spend in this category. This reduces available balance.</p>
         </div>
 
         {/* Period toggle */}

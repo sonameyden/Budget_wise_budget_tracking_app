@@ -32,10 +32,10 @@ const DashboardPage = () => {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Total Balance"    value={fmt(summary?.net_savings)}    trend={5}  accentColor="emerald" loading={isLoading} />
-        <StatCard label="Monthly Income"   value={fmt(summary?.total_income)}   trend={8}  accentColor="blue"    loading={isLoading} />
-        <StatCard label="Monthly Expenses" value={fmt(summary?.total_expenses)} trend={-3} accentColor="red"     loading={isLoading} />
-        <StatCard label="Avg Daily Spend"  value={fmt(summary?.avg_daily_spend)} trend={5} accentColor="violet"  loading={isLoading} />
+        <StatCard label="Total Balance"           value={fmt(summary?.total_balance)}            trend={5}   accentColor="emerald" loading={isLoading} />
+        <StatCard label="Monthly Income"          value={fmt(summary?.total_income)}             trend={8}   accentColor="blue"    loading={isLoading} />
+        <StatCard label="Monthly Expenses"        value={fmt(summary?.total_expenses)}           trend={-3}  accentColor="red"     loading={isLoading} />
+        <StatCard label="Remaining Available"     value={fmt(summary?.remaining_available)}      trend={5}   accentColor="violet"  loading={isLoading} />
       </div>
 
       <div className="mb-6"><QuickActions /></div>
