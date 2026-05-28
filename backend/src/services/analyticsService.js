@@ -256,13 +256,39 @@ const getHealthScore = async (userId) => {
     spent: spentByCategory[b.category] || 0,
   }));
 
-  const score = calculateFinancialScore(
-    totalMonthlyIncome,
-    totalExpenses,
-    budgetsWithSpent
+  // Fetch goals and accounts needed for stronger scoring
+  const goals = await goalRepository.findAllByUser(userId);
+  const accounts = await accountService.getAll(userId);
+
+  const totalSavingsGoals = goals.reduce(
+    (sum, goal) => sum + parseFloat(goal.monthly_savings_amount || 0),
+    0
   );
 
-  return { score };
+  const totalAccountBalance = parseFloat(
+    accounts.reduce((sum, acc) => sum + parseFloat(acc.current_balance || 0), 0)
+      .toFixed(2)
+  );
+  const totalSavingsBalance = parseFloat(
+    accounts
+      .filter((acc) => acc.account_type === 'savings_account')
+      .reduce((sum, acc) => sum + parseFloat(acc.current_balance || 0), 0)
+      .toFixed(2)
+  );
+
+  const { score, breakdown } = calculateFinancialScore(
+    totalMonthlyIncome,
+    totalExpenses,
+    budgetsWithSpent,
+    goals,
+    {
+      totalBalance: totalAccountBalance,
+      savingsBalance: totalSavingsBalance,
+    },
+    totalSavingsGoals
+  );
+
+  return { score, breakdown };
 };
 
 module.exports = {
