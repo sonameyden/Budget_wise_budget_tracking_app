@@ -8,7 +8,6 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import ProfileSection from '../features/settings/components/ProfileSection';
 import AppearanceSection from '../features/settings/components/AppearanceSection';
-import NotificationsSection from '../features/settings/components/NotificationsSection';
 import { useAuth } from '../contexts/AuthContext';
 
 const SettingsPage = () => {
@@ -26,9 +25,6 @@ const SettingsPage = () => {
 
         {/* Appearance */}
         <AppearanceSection />
-
-        {/* Notifications */}
-        <NotificationsSection />
 
         {/* Data & Privacy */}
         <Card className="p-6">
