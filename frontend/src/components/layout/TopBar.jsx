@@ -1,7 +1,7 @@
 /**
- * TopBar — search bar, notification bell, dark mode toggle.
+ * TopBar — search bar and dark mode toggle.
  */
-import { Search, Bell, Sun, Moon } from 'lucide-react';
+import { Search, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const TopBar = ({ title }) => {
@@ -23,12 +23,6 @@ const TopBar = ({ title }) => {
                        focus:outline-none focus:border-emerald-400 w-48 text-slate-700 dark:text-slate-200"
           />
         </div>
-
-        {/* Notifications */}
-        <button className="relative p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
 
         {/* Dark mode toggle */}
         <button onClick={toggleTheme}

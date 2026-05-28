@@ -74,9 +74,14 @@ const getSummary = async (userId, period = 'month') => {
   const totalSavingsGoals = goals.reduce((sum, g) => 
     sum + parseFloat(g.monthly_savings_amount || 0), 0);
 
-  // Get account balances
-  const accountData = await accountService.getNetWorth(userId);
-  const totalAccountBalance = parseFloat(accountData.total_balance || 0);
+  // Get account balances and compute savings vs. spendable cash
+  const accounts = await accountService.getAll(userId);
+  const totalAccountBalance = parseFloat(accounts.reduce((sum, acc) => sum + parseFloat(acc.current_balance || 0), 0).toFixed(2));
+  const totalSavingsBalance = parseFloat(accounts
+    .filter((acc) => acc.account_type === 'savings_account')
+    .reduce((sum, acc) => sum + parseFloat(acc.current_balance || 0), 0)
+    .toFixed(2));
+  const spendableBalance = parseFloat(Math.max(0, totalAccountBalance - totalSavingsBalance).toFixed(2));
 
   // Calculate net savings for the period (income - expenses)
   const netSavingsThisPeriod = totalMonthlyIncome - totalExpenses;
@@ -84,8 +89,14 @@ const getSummary = async (userId, period = 'month') => {
   // Calculate remaining available balance after spend plans and savings goals
   const remainingAvailable = totalMonthlyIncome - totalExpenses - totalSpendPlans - totalSavingsGoals;
 
-  // Projected end of month balance
-  const projectedEom = totalAccountBalance + netSavingsThisPeriod;
+  // Adjust total balance to reflect net transaction flow for the current period.
+  // This helps the dashboard total balance card show expense deductions immediately.
+  const adjustedTotalBalance = parseFloat(
+    (totalAccountBalance + netSavingsThisPeriod).toFixed(2)
+  );
+
+  // Projected end of month balance uses the same net flow adjustment.
+  const projectedEom = adjustedTotalBalance;
 
   // Calculate average daily spend
   const days = generateDateRange(startDate, endDate).length;
@@ -96,6 +107,12 @@ const getSummary = async (userId, period = 'month') => {
     total_income: parseFloat(totalMonthlyIncome.toFixed(2)),
     total_expenses: parseFloat(totalExpenses.toFixed(2)),
     net_savings: parseFloat(netSavingsThisPeriod.toFixed(2)),
+
+    // Account-level balances
+    raw_total_balance: totalAccountBalance,
+    total_balance: adjustedTotalBalance,
+    total_savings_balance: totalSavingsBalance,
+    spendable_balance: spendableBalance,
     
     // Planned commitments
     total_spend_plans: parseFloat(totalSpendPlans.toFixed(2)),
@@ -103,9 +120,6 @@ const getSummary = async (userId, period = 'month') => {
     
     // Available balance after planned spending
     remaining_available: parseFloat(remainingAvailable.toFixed(2)),
-    
-    // Account-level balance
-    total_balance: totalAccountBalance,
     
     // Projection for end of month
     projected_end_of_month: parseFloat(projectedEom.toFixed(2)),

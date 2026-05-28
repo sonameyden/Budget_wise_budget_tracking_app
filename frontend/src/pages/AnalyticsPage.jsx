@@ -50,13 +50,14 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Summary stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {sLoad ? [...Array(4)].map((_, i) => <SkeletonCard key={i} />) : (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        {sLoad ? [...Array(5)].map((_, i) => <SkeletonCard key={i} />) : (
           <>
-            <SummaryCard label="Total Income"    value={formatCurrency(summary?.total_income   ?? 0)} icon={TrendingUp}   color="text-emerald-500" />
-            <SummaryCard label="Total Expenses"  value={formatCurrency(summary?.total_expenses ?? 0)} icon={TrendingDown}  color="text-red-500"     />
-            <SummaryCard label="Net Savings"     value={formatCurrency(summary?.net_savings    ?? 0)} icon={DollarSign}   color="text-blue-500"    />
-            <SummaryCard label="Avg Daily Spend" value={formatCurrency(summary?.avg_daily_spend ?? 0)} icon={Activity}    color="text-violet-500"  />
+            <SummaryCard label="Total Income"      value={formatCurrency(summary?.total_income   ?? 0)} icon={TrendingUp}    color="text-emerald-500" />
+            <SummaryCard label="Total Expenses"    value={formatCurrency(summary?.total_expenses ?? 0)} icon={TrendingDown}   color="text-red-500"     />
+            <SummaryCard label="Net Savings"       value={formatCurrency(summary?.net_savings    ?? 0)} icon={DollarSign}    color="text-blue-500"    />
+            <SummaryCard label="Savings Balance"   value={formatCurrency(summary?.total_savings_balance ?? 0)} icon={DollarSign}    color="text-teal-500"   />
+            <SummaryCard label="Remaining Cash"   value={formatCurrency(summary?.remaining_available ?? 0)} icon={Activity}      color="text-violet-500"  />
           </>
         )}
       </div>

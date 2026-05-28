@@ -5,6 +5,7 @@
  */
 
 const goalRepository = require('../repositories/goalRepository');
+const accountRepository = require('../repositories/accountRepository');
 
 /**
  * Get all savings goals for the authenticated user.
@@ -27,12 +28,14 @@ const getAll = async (userId) => {
  * @returns {Promise<Object>}
  */
 const create = async (userId, body) => {
+  const initialAmount = parseFloat(body.current_amount || 0);
+
   const goalData = {
     user_id: userId,
     title: body.title.trim(),
     category: body.category || 'Custom Goal',
     target_amount: parseFloat(body.target_amount),
-    current_amount: parseFloat(body.current_amount || 0),
+    current_amount: initialAmount,
     deadline: body.deadline || null,
     completed: false,
   };
@@ -45,6 +48,20 @@ const create = async (userId, body) => {
   // Define how much to save per month toward this goal
   if (body.monthly_savings_amount !== undefined) {
     goalData.monthly_savings_amount = parseFloat(body.monthly_savings_amount);
+  }
+
+  // If initial current_amount provided and a linked account is set, deduct from that account
+  if (initialAmount > 0 && goalData.linked_savings_account_id) {
+    const acc = await accountRepository.findById(goalData.linked_savings_account_id);
+    if (!acc) {
+      const err = new Error('Linked account not found.'); err.status = 404; throw err;
+    }
+    // Prevent overdraft
+    if (parseFloat(acc.current_balance) < initialAmount) {
+      const err = new Error('Insufficient funds in linked savings account for initial goal funding.'); err.status = 400; throw err;
+    }
+    await accountRepository.update(acc.id, { current_balance: parseFloat(acc.current_balance) - initialAmount });
+    // Goal funding is a transfer/reservation, not a normal expense, so we do not log it as an expense transaction.
   }
 
   const goal = await goalRepository.create(goalData);
@@ -84,13 +101,37 @@ const update = async (goalId, userId, body) => {
 
   // When adding funds, update current_amount and auto-detect completion
   if (body.current_amount !== undefined) {
-    updates.current_amount = parseFloat(body.current_amount);
-    const targetAmount = body.target_amount
-      ? parseFloat(body.target_amount)
-      : goal.target_amount;
+    const newAmount = parseFloat(body.current_amount);
+    const delta = newAmount - (parseFloat(goal.current_amount) || 0);
+    if (delta < 0) {
+      // If user is reducing current_amount, just allow it (no account changes)
+      updates.current_amount = newAmount;
+    } else if (delta === 0) {
+      // Nothing to do
+    } else {
+      // Adding funds: if goal has linked savings account, deduct from that account
+      updates.current_amount = newAmount;
+      const targetAmount = body.target_amount
+        ? parseFloat(body.target_amount)
+        : goal.target_amount;
 
-    // Auto-complete when the goal is fully funded
-    updates.completed = updates.current_amount >= targetAmount;
+      // Auto-complete when the goal is fully funded
+      updates.completed = updates.current_amount >= targetAmount;
+
+      const linkedAccId = body.linked_savings_account_id !== undefined
+        ? body.linked_savings_account_id
+        : goal.linked_savings_account_id;
+
+      if (linkedAccId) {
+        const acc = await accountRepository.findById(linkedAccId);
+        if (!acc) { const err = new Error('Linked account not found.'); err.status = 404; throw err; }
+        if (parseFloat(acc.current_balance) < delta) {
+          const err = new Error('Insufficient funds in linked savings account for this allocation.'); err.status = 400; throw err;
+        }
+        await accountRepository.update(acc.id, { current_balance: parseFloat(acc.current_balance) - delta });
+        // Goal funding is a transfer/reservation, not a regular expense transaction.
+      }
+    }
   }
 
   const updatedGoal = await goalRepository.update(goalId, updates);

@@ -10,6 +10,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog';
 import GoalCard from '../features/goals/components/GoalCard';
 import GoalModal from '../features/goals/components/GoalModal';
 import AddFundsModal from '../features/goals/components/AddFundsModal';
+import GoalsDonut from '../features/goals/components/GoalsDonut';
 import { useGoals, useDeleteGoal } from '../features/goals/hooks/useGoals';
 import { SkeletonCard } from '../components/ui/Skeleton';
 
@@ -55,15 +56,20 @@ const GoalsPage = () => {
           actionLabel="Create Goal"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {goals.map(g => (
-            <GoalCard
-              key={g.id} goal={g}
-              onAddFunds={handleAddFunds}
-              onEdit={handleEdit}
-              onDelete={(id) => setDeleteId(id)}
-            />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {goals.map(g => (
+              <GoalCard
+                key={g.id} goal={g}
+                onAddFunds={handleAddFunds}
+                onEdit={handleEdit}
+                onDelete={(id) => setDeleteId(id)}
+              />
+            ))}
+          </div>
+          <div>
+            <GoalsDonut />
+          </div>
         </div>
       )}
 

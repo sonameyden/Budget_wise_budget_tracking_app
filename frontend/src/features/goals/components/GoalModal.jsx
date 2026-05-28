@@ -32,7 +32,9 @@ const GoalModal = ({ isOpen, onClose, initialData = null }) => {
   useEffect(() => {
     // Fetch accounts to show in savings account dropdown
     if (isOpen) {
-      apiClient.get('/accounts').then(res => setAccounts(res.data?.accounts || [])).catch(() => {});
+      apiClient.get('/accounts')
+        .then(res => setAccounts(res.data?.data?.accounts || []))
+        .catch(() => {});
     }
   }, [isOpen]);
 
@@ -166,13 +168,20 @@ const GoalModal = ({ isOpen, onClose, initialData = null }) => {
           </p>
           <select className={INPUT_CLS} {...register('linked_savings_account_id')}>
             <option value="">No account linked</option>
-            {accounts.map(acc => (
-              <option key={acc.id} value={acc.id}>
-                {acc.account_name} ({acc.account_type})
-              </option>
-            ))}
+            {accounts
+              .filter((acc) => acc.account_type === 'savings_account')
+              .map((acc) => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.account_name} ({acc.account_type})
+                </option>
+              ))}
           </select>
-          <p className="text-xs text-slate-400 mt-1">Select a savings account to track progress.</p>
+          <p className="text-xs text-slate-400 mt-1">
+            Select a savings account so goal deposits are tracked from that account.
+            {accounts.filter((acc) => acc.account_type === 'savings_account').length === 0 && (
+              <span className="block text-xs text-amber-500 mt-1">Add a savings account first to link it here.</span>
+            )}
+          </p>
         </div>
 
         {/* Monthly Savings Amount */}

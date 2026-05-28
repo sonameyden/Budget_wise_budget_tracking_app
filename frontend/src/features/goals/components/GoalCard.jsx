@@ -44,6 +44,15 @@ const GoalCard = ({ goal, onAddFunds, onEdit, onDelete }) => {
         )}
       </div>
 
+      <div className="mb-4 text-xs text-slate-500 space-y-1">
+        {goal.linked_savings_account_id && (
+          <p className="text-slate-600 dark:text-slate-300">Linked savings account attached</p>
+        )}
+        {goal.monthly_savings_amount > 0 && (
+          <p className="text-slate-600 dark:text-slate-300">Planned monthly deposit {formatCurrency(goal.monthly_savings_amount, currency)}</p>
+        )}
+      </div>
+
       {goal.completed
         ? <div className="text-center py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 text-sm font-medium rounded-xl">🎉 Goal Completed!</div>
         : <Button variant="outline" onClick={() => onAddFunds(goal)} className="w-full" size="sm">Add Funds</Button>
