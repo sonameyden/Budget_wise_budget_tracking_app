@@ -38,4 +38,18 @@ router.get(
   authController.getMe
 );
 
+// GET /api/auth/export-data — export the user's data as JSON or CSV
+router.get(
+  '/export-data',
+  authMiddleware,
+  authController.exportData
+);
+
+// DELETE /api/auth/me — delete the currently authenticated user's account
+router.delete(
+  '/me',
+  authMiddleware,
+  authController.deleteMe
+);
+
 module.exports = router;

@@ -9,6 +9,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/env');
 const userRepository = require('../repositories/userRepository');
+const accountRepository = require('../repositories/accountRepository');
+const transactionRepository = require('../repositories/transactionRepository');
+const budgetRepository = require('../repositories/budgetRepository');
+const goalRepository = require('../repositories/goalRepository');
+const incomeRepository = require('../repositories/incomeRepository');
 
 /**
  * Register a new user account.
@@ -32,6 +37,42 @@ const register = async ({ name, email, password }) => {
   const token = signToken(user.id);
 
   return { token, user };
+};
+
+/**
+ * Export the authenticated user's full data payload.
+ * Returns a JSON-friendly object containing the user's profile and all related records.
+ *
+ * @param {string} userId
+ * @returns {Promise<Object>}
+ */
+const exportUserData = async (userId) => {
+  const user = await userRepository.findById(userId);
+  const accounts = await accountRepository.findAllByUser(userId);
+  const transactions = await transactionRepository.findAllByUser(userId);
+  const budgets = await budgetRepository.findAllByUser(userId);
+  const goals = await goalRepository.findAllByUser(userId);
+  const incomeSources = await incomeRepository.findAllByUser(userId);
+
+  return {
+    user,
+    accounts,
+    transactions,
+    budgets,
+    goals,
+    incomeSources,
+  };
+};
+
+/**
+ * Delete the authenticated user's account and all owned data.
+ * This currently removes the user row; cascading deletes should be handled by database constraints.
+ *
+ * @param {string} userId
+ * @returns {Promise<void>}
+ */
+const deleteAccount = async (userId) => {
+  await userRepository.remove(userId);
 };
 
 /**
@@ -80,4 +121,4 @@ const signToken = (userId) => {
   );
 };
 
-module.exports = { register, login };
+module.exports = { register, login, exportUserData, deleteAccount };

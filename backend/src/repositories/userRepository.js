@@ -93,4 +93,13 @@ const update = async (id, updates) => {
   return data;
 };
 
-module.exports = { findByEmail, findById, create, update };
+const remove = async (id) => {
+  const { error } = await supabase
+    .from('users')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(`Failed to delete user: ${error.message}`);
+};
+
+module.exports = { findByEmail, findById, create, update, remove };
