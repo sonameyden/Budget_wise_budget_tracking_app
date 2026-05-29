@@ -11,7 +11,7 @@ const authController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateMiddleware = require('../middleware/validateMiddleware');
 const { authLimiter } = require('../middleware/rateLimitMiddleware');
-const { registerSchema, loginSchema } = require('../schemas/authSchemas');
+const { registerSchema, loginSchema, updateProfileSchema } = require('../schemas/authSchemas');
 
 // POST /api/auth/register — create a new user account
 router.post(
@@ -36,6 +36,14 @@ router.get(
   '/me',
   authMiddleware,       // Verify JWT — attaches req.user
   authController.getMe
+);
+
+router.patch(
+  '/profile',
+  authMiddleware,
+  updateProfileSchema,
+  validateMiddleware,
+  authController.updateProfile
 );
 
 // GET /api/auth/export-data — export the user's data as JSON or CSV

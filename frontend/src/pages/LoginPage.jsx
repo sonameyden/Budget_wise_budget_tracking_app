@@ -28,7 +28,7 @@ const LoginPage = () => (
 
         {/* Stat badges */}
         <div className="flex gap-4 justify-center">
-          {[{ value: '$0', label: 'Setup cost' }, { value: '24/7', label: 'AI Insights' }].map(({ value, label }) => (
+          {[{ value: '$0', label: 'Setup cost' }].map(({ value, label }) => (
             <div key={label} className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-center">
               <p className="text-white font-bold text-lg">{value}</p>
               <p className="text-emerald-100/70 text-xs">{label}</p>

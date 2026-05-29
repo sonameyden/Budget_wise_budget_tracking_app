@@ -106,6 +106,17 @@ const login = async (email, password) => {
   return { token, user };
 };
 
+const updateProfile = async (userId, updates) => {
+  const normalized = {};
+  if (updates.name !== undefined) normalized.name = updates.name.trim();
+  if (updates.avatar_url !== undefined) normalized.avatar_url = updates.avatar_url;
+  if (updates.currency !== undefined) normalized.currency = updates.currency;
+  if (updates.theme !== undefined) normalized.theme = updates.theme;
+
+  const user = await userRepository.update(userId, normalized);
+  return user;
+};
+
 /**
  * Signs a JWT with the user's ID as the payload.
  * All token configuration comes from the config object.
@@ -121,4 +132,4 @@ const signToken = (userId) => {
   );
 };
 
-module.exports = { register, login, exportUserData, deleteAccount };
+module.exports = { register, login, updateProfile, exportUserData, deleteAccount };

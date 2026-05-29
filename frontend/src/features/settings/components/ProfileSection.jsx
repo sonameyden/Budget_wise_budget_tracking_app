@@ -5,16 +5,17 @@ import Card from '../../../components/ui/Card';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useUpdateProfile } from '../hooks/useSettings';
 
 const ProfileSection = () => {
   const { user } = useAuth();
+  const { mutate: updateProfile, isLoading } = useUpdateProfile();
   const { register, handleSubmit, reset } = useForm({ defaultValues: { name: user?.name, email: user?.email } });
 
   useEffect(() => { reset({ name: user?.name, email: user?.email }); }, [user, reset]);
 
   const onSubmit = (data) => {
-    // Profile update would call useUpdateProfile — wired in parent
-    console.log('Profile update:', data);
+    updateProfile(data);
   };
 
   return (
@@ -43,7 +44,7 @@ const ProfileSection = () => {
           <Input label="Email" type="email" readOnly className="bg-slate-50 dark:bg-slate-800 cursor-not-allowed"
             {...register('email')} />
         </div>
-        <Button type="submit" size="sm">Save Changes</Button>
+        <Button type="submit" size="sm" loading={isLoading}>Save Changes</Button>
       </form>
     </Card>
   );

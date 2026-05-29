@@ -42,4 +42,12 @@ const loginSchema = [
     .notEmpty().withMessage('Password is required.'),
 ];
 
-module.exports = { registerSchema, loginSchema };
+const updateProfileSchema = [
+  body('name')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('Name cannot be empty.')
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2–100 characters.'),
+];
+
+module.exports = { registerSchema, loginSchema, updateProfileSchema };

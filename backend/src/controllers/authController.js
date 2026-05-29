@@ -88,9 +88,20 @@ const exportData = async (req, res) => {
   return res.send(exported);
 };
 
+const updateProfile = async (req, res) => {
+  const updates = {};
+  if (req.body.name !== undefined) updates.name = req.body.name;
+  if (req.body.avatar_url !== undefined) updates.avatar_url = req.body.avatar_url;
+  if (req.body.currency !== undefined) updates.currency = req.body.currency;
+  if (req.body.theme !== undefined) updates.theme = req.body.theme;
+
+  const user = await authService.updateProfile(req.user.id, updates);
+  return sendSuccess(res, { user });
+};
+
 const deleteMe = async (req, res) => {
   await authService.deleteAccount(req.user.id);
   return sendSuccess(res, { message: 'Account deleted successfully.' });
 };
 
-module.exports = { register, login, getMe, exportData, deleteMe };
+module.exports = { register, login, getMe, updateProfile, exportData, deleteMe };
